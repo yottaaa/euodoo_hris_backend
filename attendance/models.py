@@ -5,7 +5,7 @@ import pytz
 
 class QRcode(models.Model):
     code = models.CharField(max_length=100, null=True, blank=True)
-    date_created = models.DateTimeField(null=True,blank=True)
+    date_created = models.DateTimeField(null=True,blank=True,default=timezone.now)
 
     class Meta:
         ordering = ['-date_created']
@@ -13,6 +13,18 @@ class QRcode(models.Model):
     def __str__(self):
         return self.code
 
-    def save(self, *args, **kwargs):
-        self.date_created = timezone.now()
-        super(QRcode, self).save(*args,**kwargs)
+class AttendanceLog(models.Model):
+    ATTEND_STATUS = [
+        ('TIMEIN', 'time in'),
+        ('TIMEOUT', 'time out'),
+    ]
+    employee = models.ForeignKey(User, related_name='user_attendance', on_delete=models.CASCADE)
+    code = models.ForeignKey(QRcode, related_name='code_attendance', on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=ATTEND_STATUS, default='TIMEIN')
+    date_created = models.DateTimeField(null=True,blank=True,default=timezone.now)
+
+    class Meta:
+        ordering = ['-date_created']
+
+    def __str__(self):
+        return f'{self.employee.username} ({self.status})'
