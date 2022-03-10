@@ -1,10 +1,12 @@
+from email.policy import default
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 import pytz
+import secrets
 
 class QRcode(models.Model):
-    code = models.CharField(max_length=100, null=True, blank=True)
+    code = models.CharField(max_length=100, null=True, blank=True, default=secrets.token_hex(16))
     date_created = models.DateTimeField(null=True,blank=True,default=timezone.now)
 
     class Meta:
