@@ -19,6 +19,18 @@ from account.serializers import UserSerializer
 def register(request):
     pass
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def ping_server(request):
+    '''
+        Ping the Server if the request user is authenticated
+    '''
+    try:
+        return Response({'detail':'Hello'},status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'detail': str(e)},status=status.HTTP_401_UNAUTHORIZED)
+
+
 class LoginAPI(KnoxLoginView):
     permission_classes = (permissions.AllowAny,)
 

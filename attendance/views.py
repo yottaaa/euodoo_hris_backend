@@ -4,9 +4,11 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import viewsets
-from datetime import date
+from datetime import date, datetime
 
-from .serializers import AttendanceLogSerializer, QRcodeSerializer
+from django.contrib.auth.models import User
+
+from .serializers import AttendanceLogSerializer, QRcodeSerializer, EmployeeSerializer, AttendanceCalculateSerializer
 from .models import AttendanceLog, QRcode
 # Create your views here.
 
@@ -20,6 +22,15 @@ class AttendanceLogList(viewsets.ViewSet):
             serializer = AttendanceLogSerializer(queryset, many=True)
         except Exception as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data)
+
+    def get_users(self, request, format=None):
+        try: 
+            users = User.objects.all()
+            serializer = EmployeeSerializer(users, many=True)
+        except Exception as e:
+            return Response({'detail':str(e)},status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.data)
 
     def get_by_user(self, request, format=None):
@@ -76,7 +87,26 @@ class AttendanceLogDetail(viewsets.ViewSet):
     def get_status(self, request, format=None):
         try:
             latest_status = AttendanceLog.objects.latest('id')
+        except AttendanceLog.DoesNotExist:
+            return Response({'latest_status': 'TIMEOUT'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'detail':str(e)},status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'latest_status': latest_status.status, 'datetime': latest_status.date_created})
+
+    def filter_by_user_date(self, request, format=None):
+        try:
+            start_date = datetime.strptime(request.data['date_range'][0], '%Y-%m-%d')
+            end_date = datetime.strptime(request.data['date_range'][1], '%Y-%m-%d')
+            _user = User.objects.get(username=request.data['employee'])
+            queryset = AttendanceLog.objects.filter(
+                employee=_user,
+                date_created__date__range=(start_date,end_date)
+            )
+            serializer = AttendanceCalculateSerializer(queryset, many=True)
+        except User.DoesNotExist:
+            return Response({'detail':'Employee does not exist!'},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'detail':str(e)},status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data)

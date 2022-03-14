@@ -26,8 +26,27 @@ class AttendanceLogSerializer(serializers.ModelSerializer):
 
     def get_employee(self, obj):
         emp = User.objects.get(id=obj.employee.id)
-        return {
-            'username': emp.username,
-            'first_name': emp.first_name,
-            'last_name': emp.last_name,
-        }
+        return emp.username
+
+class AttendanceCalculateSerializer(serializers.ModelSerializer):
+    employee = SerializerMethodField()
+    class Meta:
+        model = AttendanceLog
+        fields = (
+            'id',
+            'employee',
+            'status',
+            'date_created',
+        )
+
+    def get_employee(self, obj):
+        emp = User.objects.get(id=obj.employee.id)
+        return emp.username
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'username'
+        )

@@ -5,6 +5,7 @@ from knox import views as knox_views
 from account import views as acc_views
 
 urlpatterns = [
+    path('ping/', acc_views.ping_server, name='ping-server'),
     path('admin_login/', acc_views.AdminLoginAPI.as_view(), name='admin-login'),
     path('login/', acc_views.LoginAPI.as_view(), name='regular-login'),
     path('logout/', knox_views.LogoutView.as_view(), name='user-logout'),

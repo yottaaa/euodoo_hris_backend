@@ -1,0 +1,1 @@
+web: gunicorn hris_backend.wsgi
