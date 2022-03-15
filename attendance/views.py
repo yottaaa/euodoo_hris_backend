@@ -1,10 +1,14 @@
 from os import stat
+from urllib import response
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import viewsets
 from datetime import date, datetime
+from django.http import Http404, HttpResponse
+from django.conf import settings
+import os
 
 from django.contrib.auth.models import User
 
@@ -110,3 +114,13 @@ class AttendanceLogDetail(viewsets.ViewSet):
             return Response({'detail':str(e)},status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.data)
+
+def downloadAPK(request):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'app', 'euodoo_attendance.apk')
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/apk")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+    else:
+        raise Http404

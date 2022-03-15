@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AttendanceLogList, AttendanceLogDetail
+from .views import AttendanceLogList, AttendanceLogDetail, downloadAPK
 
 urlpatterns = [
     path('users/', AttendanceLogList.as_view({'get': 'get_users'}), name='attend-users'),
@@ -11,4 +11,6 @@ urlpatterns = [
 
     path('latest_status/', AttendanceLogDetail.as_view({'get': 'get_status'}), name='latest-status'),
     path('filter/', AttendanceLogDetail.as_view({'post': 'filter_by_user_date'}), name='filter-user-date'),
+
+    path('app/', downloadAPK, name='attend-app')
 ]
